@@ -8,7 +8,9 @@
 *.map
 *.sta
 *.plg
+*.bak
 *.sct
+*.uvopt
 *.uvproj
 *.dep
 *.htm
