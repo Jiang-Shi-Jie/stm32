@@ -158,7 +158,6 @@ int main (void){
 #include "buzzer.h"
 
 int main (void){
-
 	RCC_Configuration();
 	LED_init();
 	KEY_init();
@@ -189,7 +188,7 @@ int main (void){
 	LED_init();
 	KEY_init();
 	BUZZER_init();
-	USART1_init(115200);
+	USART1_init(115200,DISABLE);
 	BUZZER_play(300,554);
 	while(1) {
 		if(!GPIO_ReadInputDataBit(GPIOA,SIMPLE_KEY1)) {
@@ -202,4 +201,72 @@ int main (void){
 			}
 		}
     }
+}
+
+#[查询式串口接收数据]####################################################################
+#include "stm32f10x.h"
+#include "buzzer.h"
+#include "usart.h"
+#include "led.h"
+
+int main (void){
+	u8 buffer;
+	RCC_Configuration();
+	LED_init();
+	BUZZER_init();
+	USART1_init(115200,DISABLE);
+	BUZZER_play(300,554);
+	while(1) {
+		if(USART_GetFlagStatus(USART1,USART_FLAG_RXNE) != RESET) {
+			buffer = USART_ReceiveData(USART1);
+			switch(buffer) {
+				case '1':
+				    BUZZER_play(300,1000);
+				    GPIO_WriteBit(GPIOB,LED,(BitAction)(1-GPIO_ReadInputDataBit(GPIOB,LED)));
+					USART1_printf("Switch Success");
+				    break;
+				default:
+					break;
+			}
+		}
+    }
+}
+
+#[RTC走时程序 ]####################################################################
+#include "stm32f10x.h"
+#include "led.h"
+#include "rtc.h"
+#include "usart.h"
+
+
+int main (void){
+	u8 buffer;
+	u32 val;
+	struct DateTime datetime;
+	RCC_Configuration();
+	datetime.year = 2018;
+	datetime.month = 8;
+	datetime.day = 22;
+	datetime.hour = 19;
+	datetime.minute = 40;
+	datetime.second = 0;
+	USART1_init(115200,DISABLE);
+	USART1_printf("INIT USART1");
+	LED_init();
+	USART1_printf("INIT LED");
+	RTC_init();
+	val = RTC_Set(datetime);
+	USART1_printf("INIT RTC[%d]",val);
+	val=RTC_GetCounter();
+	USART1_printf("INIT RTC[%d]",val);
+	while(1) {
+		 datetime = RTC_dateTime();
+		 if(buffer != datetime.second) {
+			buffer = datetime.second;
+			val=RTC_GetCounter();
+			USART1_printf("READ RTC[%d]\n",val);
+		 	USART1_printf("%d-%d-%d %d:%d:%d (%d)\n",datetime.year,datetime.month,datetime.day,datetime.hour,datetime.minute,datetime.second,datetime.week);
+		 	GPIO_WriteBit(GPIOB,LED,(BitAction)(datetime.second % 2));
+		 }
+	}	
 }

@@ -1,7 +1,7 @@
 #include "usart.h"
 #include "stdarg.h"
 
-void USART1_init(u32 speed) {
+void USART1_init(u32 speed,FunctionalState NewState) {
 GPIO_InitTypeDef usartPinConfig;
 USART_InitTypeDef	usartConfig;
 NVIC_InitTypeDef nvicConfig;
@@ -27,7 +27,7 @@ usartConfig.USART_Parity = USART_Parity_No;
 usartConfig.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
 usartConfig.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
 USART_Init(USART1,&usartConfig);
-USART_ITConfig(USART1,USART_IT_RXNE,ENABLE);
+USART_ITConfig(USART1,USART_IT_RXNE,NewState);
 USART_Cmd(USART1,ENABLE);
 }
 
@@ -36,7 +36,7 @@ void USART1_send_char(u8 data) {
    while(USART_GetFlagStatus(USART1,USART_FLAG_TC) == RESET);
 }
 
-void USART1_printf (char *fmt, ...){ 
+void USART1_printf(char *fmt, ...){ 
 	char buffer[USART_REC_LEN+1];
 	u8 i = 0;	
 	va_list arg_ptr;
@@ -46,4 +46,12 @@ void USART1_printf (char *fmt, ...){
 		USART1_send_char((u8) buffer[i++]);
 	}
 	va_end(arg_ptr);
+}
+
+void USART1_IRQHandler(void) {
+	u8 buffer;
+	if(USART_GetITStatus(USART1,USART_IT_RXNE) != RESET) {
+		buffer = USART_ReceiveData(USART1);
+
+	}
 }

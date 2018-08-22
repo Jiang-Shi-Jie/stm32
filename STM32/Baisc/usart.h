@@ -5,7 +5,7 @@
 
 #include "sys.h"
 
-void USART1_init(u32 speed);
+void USART1_init(u32 speed,FunctionalState NewState);
 void USART1_send_char(u8 data);
 void USART1_printf (char *fmt, ...);
 

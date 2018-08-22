@@ -1,0 +1,7 @@
+#ifndef _HANDLER_H_
+#define _HANDLER_H_
+
+//RTCÃëÖÐ¶Ïº¯Êý
+void RTC_IRQHandler(void);
+
+#endif
