@@ -1,33 +1,25 @@
 #include "stm32f10x.h"
 #include "led.h"
-#include "rtc.h"
-#include "usart.h"
-
+#include "touchkey.h"
+#include "buzzer.h"
 
 int main (void){
-	u8 buffer;
-	u32 val;
-	struct DateTime datetime;
 	RCC_Configuration();
-	datetime.year = 2018;
-	datetime.month = 8;
-	datetime.day = 22;
-	datetime.hour = 19;
-	datetime.minute = 40;
-	datetime.second = 0;
-	USART1_init(115200,DISABLE);
-	USART1_printf("INIT USART1");
+	TOUCH_KEY_init();
 	LED_init();
-	USART1_printf("INIT LED");
-	RTC_init();
-	USART1_printf("INIT RTC");
+	BUZZER_init();
 	while(1) {
-		 datetime = RTC_dateTime();
-		 if(buffer != datetime.second) {
-			buffer = datetime.second;
-			val=RTC_GetCounter();
-		 	USART1_printf("%d-%d-%d %d:%d:%d (%d)\n",datetime.year,datetime.month,datetime.day,datetime.hour,datetime.minute,datetime.second,datetime.week);
-		 	GPIO_WriteBit(GPIOB,LED,(BitAction)(datetime.second % 2));
-		 }
-	}	
+	   	if(!GPIO_ReadInputDataBit(GPIOA,TOUCHKEY_A)) {
+			GPIO_WriteBit(GPIOB,LED,(BitAction)(1-GPIO_ReadInputDataBit(GPIOB,LED)));
+			BUZZER_play(300,1000);
+		}
+		if(!GPIO_ReadInputDataBit(GPIOA,TOUCHKEY_B)) {
+			GPIO_WriteBit(GPIOB,LED,Bit_SET);
+			BUZZER_play(300,1500);
+		}
+		if(!GPIO_ReadInputDataBit(GPIOA,TOUCHKEY_C)) {
+			GPIO_WriteBit(GPIOB,LED,Bit_RESET);
+			BUZZER_play(300,2000);
+		}
+	}		
 }
