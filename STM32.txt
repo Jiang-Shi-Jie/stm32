@@ -271,7 +271,7 @@ int main (void){
 	}	
 }
 
-#[触摸按键 ]####################################################################
+#[触摸按键单击 ]####################################################################
 #include "stm32f10x.h"
 #include "led.h"
 #include "touchkey.h"
@@ -296,4 +296,119 @@ int main (void){
 			BUZZER_play(300,2000);
 		}
 	}		
+}
+
+#[触摸按键单击 双击  长按 ]####################################################################
+#include "stm32f10x.h"
+#include "led.h"
+#include "touchkey.h"
+#include "buzzer.h"
+#include "delay.h"
+
+int main (void){
+	u16 keyFlag;
+	u8 i;
+	RCC_Configuration();
+	TOUCH_KEY_init();
+	LED_init();
+	BUZZER_init();
+	while(1) {
+	   	if(!GPIO_ReadInputDataBit(GPIOA,TOUCHKEY_D)) {
+			delay_ms(20);
+			if(!GPIO_ReadInputDataBit(GPIOA,TOUCHKEY_D)) {
+				keyFlag = 0;
+				i = 0;
+				//长按判断时长  220
+				while(!GPIO_ReadInputDataBit(GPIOA,TOUCHKEY_D) && keyFlag < 220) {
+					keyFlag++;
+					delay_ms(10);
+				}
+				if(keyFlag >= 220) {
+					//长按
+					BUZZER_play(300,2000);
+					GPIO_WriteBit(GPIOB,LED1,Bit_RESET);
+					GPIO_WriteBit(GPIOB,LED2,Bit_RESET);
+					while(!GPIO_ReadInputDataBit(GPIOA,TOUCHKEY_D));
+				}else {
+					//双击判断时长 30
+					for(i=0;i<30;i++) {
+						delay_ms(10);
+						if(!GPIO_ReadInputDataBit(GPIOA,TOUCHKEY_D)) {
+							keyFlag = 50000;
+							//双击
+							GPIO_WriteBit(GPIOB,LED2,Bit_SET);
+							BUZZER_play(300,1500);
+							while(!GPIO_ReadInputDataBit(GPIOA,TOUCHKEY_D));
+						}
+					}
+					if(keyFlag < 50000) {
+						//单击
+						GPIO_WriteBit(GPIOB,LED1,Bit_SET);
+						BUZZER_play(300,1000);
+					}	
+				}
+		   	}
+		}
+	}		
+}
+
+
+#[TM1640驱动数码管显示RTC走时 ]####################################################################
+#include "stm32f10x.h"
+#include "led.h"
+#include "rtc.h"
+#include "usart.h"
+#include "tm1640.h"
+
+int main (void){
+	u8 buffer,sm1,sm2,sm3,sm4,sm5,sm6,sm7,sm0;
+	u32 val;
+	const u8 ledd[] = {0x40,0x01,0x02,0x04,0x08,0x10,0x20};
+	struct DateTime datetime;
+	RCC_Configuration();
+	datetime.year = 2018;
+	datetime.month = 8;
+	datetime.day = 22;
+	datetime.hour = 19;
+	datetime.minute = 40;
+	datetime.second = 0;
+	USART1_init(115200,DISABLE);
+	USART1_printf("INIT USART1");
+	LED_init();
+	USART1_printf("INIT LED");
+	RTC_init();
+	USART1_printf("INIT RTC");
+	TM1640_init();
+    USART1_printf("INIT TM1640");
+	while(1) {
+		 datetime = RTC_dateTime();
+		 if(buffer != datetime.second) {
+			buffer = datetime.second;
+			val=RTC_GetCounter();
+			USART1_printf("READ RTC[%d]\n",val);
+		 	USART1_printf("%d-%d-%d %d:%d:%d (%d)\n",datetime.year,datetime.month,datetime.day,datetime.hour,datetime.minute,datetime.second,datetime.week);
+			sm0 = datetime.month / 10;
+			sm1 = datetime.month % 10;
+			sm2 = datetime.day / 10;
+			sm3 = datetime.day % 10;
+			sm4 = datetime.hour / 10;
+			sm5 = datetime.hour % 10;
+			sm6 = datetime.minute / 10;
+			sm7 = datetime.minute % 10;
+			if(datetime.second%2) {
+			   sm7 += 10;
+			}
+			TM1640_display(0,sm0);
+			TM1640_display(1,sm1);
+			TM1640_display(2,sm2);
+			TM1640_display(3,sm3);
+			TM1640_display(4,sm4);
+			TM1640_display(5,sm5);
+			TM1640_display(6,sm6);
+			TM1640_display(7,sm7);
+			TM1640_led(ledd[datetime.week]);
+		 	GPIO_WriteBit(GPIOB,LED1,(BitAction)(datetime.second % 2));
+			GPIO_WriteBit(GPIOB,LED2,(BitAction)(1-(datetime.second % 2)));
+		 }
+	}	
 }

@@ -2,7 +2,8 @@
 #define _LED_H_
 #include "sys.h"
 
-#define LED GPIO_Pin_0
+#define LED1 GPIO_Pin_0
+#define LED2 GPIO_Pin_1
 
 //≥ı ºªØ
  void LED_init(void);
