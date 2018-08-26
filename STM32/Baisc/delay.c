@@ -3,7 +3,6 @@
 
 #define AHB_INPUT  72
 
-
 void delay_us(u32 uS){ //uS微秒级延时程序（参考值即是延时数，72MHz时最大值233015）	
 	SysTick->LOAD=AHB_INPUT * uS;      //重装计数初值（当主频是72MHz，72次为1微秒）
 	SysTick->VAL=0x00;        //清空定时器的计数器
@@ -17,7 +16,7 @@ void delay_ms(u16 ms){ //mS毫秒级延时程序（参考值即是延时数，最大值65535）
 		delay_us(1000);
 	}
 }
- 
+
 void delay_s(u16 s){ //S秒级延时程序（参考值即是延时数，最大值65535）	 		  	  
 	while( s-- != 0){
 		delay_ms(1000);
