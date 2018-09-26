@@ -20,14 +20,21 @@ void IIC_init(void) {
 	I2C_Cmd(I2C1,ENABLE);   //使能IIC
 }
 
-void IIC_sendBuffer(u8 maddr,u8 taddr,u8* data) {
+void IIC_sendBuffer(u8 maddr,u8 taddr,u8* data,u16 len) {
 	I2C_GenerateSTART(I2C1, ENABLE);
 	while(!I2C_CheckEvent(I2C1,I2C_EVENT_MASTER_MODE_SELECT));
 	I2C_Send7bitAddress(I2C1, maddr, I2C_Direction_Transmitter);
 	while(!I2C_CheckEvent(I2C1,I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED));
 	I2C_SendData(I2C1, taddr);
 	while(!I2C_CheckEvent(I2C1,I2C_EVENT_MASTER_BYTE_TRANSMITTED));
+	while(len--){
+	  	I2C_SendData(I2C1,*data);
+		data++;
+		while(!I2C_CheckEvent(I2C1,I2C_EVENT_MASTER_BYTE_TRANSMITTED));
+	}
+	I2C_GenerateSTOP(I2C1,ENABLE);
 }
+
 //iic总线发送一个字节  maddr 器地址  taddr 目标地址   data数据
 void IIC_sendByte(u8 maddr,u8 taddr,u8 data) {
 	I2C_GenerateSTART(I2C1, ENABLE);  //产生 I2Cx 传输 START 条件
@@ -38,7 +45,7 @@ void IIC_sendByte(u8 maddr,u8 taddr,u8 data) {
 	while(!I2C_CheckEvent(I2C1,I2C_EVENT_MASTER_BYTE_TRANSMITTED));
 	I2C_SendData(I2C1, data);
 	while(!I2C_CheckEvent(I2C1,I2C_EVENT_MASTER_BYTE_TRANSMITTED));
-	I2C_GenerateSTOP(I2C1, ENABLE);  // 
+	I2C_GenerateSTOP(I2C1, ENABLE);  
 }
 
 void IIC_readBuffer(u8 SlaveAddr,u8 readAddr,u8* pBuffer,u16 NumByteToRead){

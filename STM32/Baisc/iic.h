@@ -11,7 +11,7 @@
 #define BusSpeed 200000	 //总线速度  <400000
 
 void IIC_init(void);
-void IIC_sendBuffer(u8 maddr,u8 taddr,u8* data);
+void IIC_sendBuffer(u8 maddr,u8 taddr,u8* data,u16 len);
 void IIC_sendByte(u8 maddr,u8 taddr,u8 data);
 void IIC_readBuffer(u8 SlaveAddr,u8 readAddr,u8* pBuffer,u16 NumByteToRead);
 u8 IIC_readByte(u8 SlaveAddr,u8 readAddr);
