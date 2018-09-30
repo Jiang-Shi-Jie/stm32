@@ -15,5 +15,6 @@ void OLED_display_clear(void);
 void OLED_display8x16(u8 x,u8 y,u8 ind);
 void OLED_display8x16_str(u8 row,u8 *str);
 void OLED_display16x16(u8 x,u8 y,u16 Ind);
+void OLED_display128x64(const unsigned char img[1024]);
 
 #endif

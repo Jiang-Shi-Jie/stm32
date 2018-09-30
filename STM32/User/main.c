@@ -1,23 +1,23 @@
 #include "stm32f10x.h"
-#include "lm75a.h"
-#include "oled0561.h"
 #include "delay.h"
+#include "relay.h"
+#include "touchkey.h"
 
 int main (void){
-	u8 buff[3];
-	delay_ms(100);
-	RCC_Configuration();
-	IIC_init();
-	LM75A_read(buff);
-	OLED_init();
-	OLED_display8x16_str(0,"  Temp:");
-	while(1){
-		LM75A_read(buff);
-		OLED_display8x16(16,2,buff[1]/10+0x30);
-	    OLED_display8x16(24,2,buff[1]%10+0x30);
-		OLED_display8x16(32,2,'.');
-		OLED_display8x16(40,2,buff[2]/10+0x30);
-		OLED_display8x16(48,2,buff[2]%10+0x30);
-		delay_ms(100);
+  TOUCH_KEY_init();
+  Relay_init();
+  while(1){
+    if(!GPIO_ReadInputDataBit(GPIOA,TOUCHKEY_A)) {
+	  setRelay1(Bit_SET); 
+	}
+	if(!GPIO_ReadInputDataBit(GPIOA,TOUCHKEY_B)) {
+	  setRelay1(Bit_RESET);
+	}
+	if(!GPIO_ReadInputDataBit(GPIOA,TOUCHKEY_C)) {
+	  setRelay2(Bit_SET);
+	}
+	if(!GPIO_ReadInputDataBit(GPIOA,TOUCHKEY_D)) {
+	  setRelay2(Bit_RESET);
 	}	
+  }	
 }

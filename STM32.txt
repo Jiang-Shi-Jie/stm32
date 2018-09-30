@@ -514,6 +514,56 @@ int main (void){
 	}	
 }
 
+#[OLD显示图片 温度]####################################################################
+#include "stm32f10x.h"
+#include "lm75a.h"
+#include "oled0561.h"
+#include "delay.h"
+#include "oleddata.h"
+
+int main (void){
+	u8 buff[3];
+	delay_ms(100);
+	RCC_Configuration();
+	IIC_init();
+	OLED_init();
+	OLED_display128x64(IMGTAB);
+	while(1){
+		LM75A_read(buff);
+		OLED_display8x16(72,6,buff[1]/10+0x30);
+	    OLED_display8x16(80,6,buff[1]%10+0x30);
+		OLED_display8x16(88,6,'.');
+		OLED_display8x16(96,6,buff[2]/10+0x30);
+		OLED_display8x16(104,6,buff[2]%10+0x30);
+		delay_ms(100);
+	}	
+}
+
+#[触摸键控制继电器]####################################################################
+#include "stm32f10x.h"
+#include "delay.h"
+#include "relay.h"
+#include "touchkey.h"
+
+int main (void){
+  TOUCH_KEY_init();
+  Relay_init();
+  while(1){
+    if(!GPIO_ReadInputDataBit(GPIOA,TOUCHKEY_A)) {
+	  setRelay1(Bit_SET); 
+	}
+	if(!GPIO_ReadInputDataBit(GPIOA,TOUCHKEY_B)) {
+	  setRelay1(Bit_RESET);
+	}
+	if(!GPIO_ReadInputDataBit(GPIOA,TOUCHKEY_C)) {
+	  setRelay2(Bit_SET);
+	}
+	if(!GPIO_ReadInputDataBit(GPIOA,TOUCHKEY_D)) {
+	  setRelay2(Bit_RESET);
+	}	
+  }	
+}
+
 
 
 #[XXXXXXXX ]####################################################################

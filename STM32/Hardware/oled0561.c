@@ -79,7 +79,7 @@ void OLED_display8x16_str(u8 row,u8 *str) {
 
 void OLED_display16x16(u8 x,u8 y,u16 ind) {
   u8 i,j;
-  y+=2; //OLED 屏驱动芯片是从0x02开始作为最左一列
+  x+=2; //OLED 屏驱动芯片是从0x02开始作为最左一列
   for(i=0;i<2;i++) {
   	IIC_sendByte(OLED0561_ADDR,CON,0xb0+y);    
 	IIC_sendByte(OLED0561_ADDR,CON,x/16 + 0x10);    //起始页的高4位
@@ -88,6 +88,18 @@ void OLED_display16x16(u8 x,u8 y,u16 ind) {
 	   IIC_sendByte(OLED0561_ADDR,DAT,CHINESETAB[ind][16*i+j]);
 	}
 	y++;
+  }
+}
+
+void OLED_display128x64(const unsigned char img[1024]) {
+  u8 i,j;
+  for(i=0;i<8;i++) {
+	IIC_sendByte(OLED0561_ADDR,CON,0xb0+i);
+	IIC_sendByte(OLED0561_ADDR,CON,0x10);    //起始页的高4位
+	IIC_sendByte(OLED0561_ADDR,CON,0x02);
+    for(j=0;j<128;j++) {
+	  IIC_sendByte(OLED0561_ADDR,DAT,img[i*128+j]);		
+    }
   }
 }
 
